@@ -34,10 +34,15 @@ contact = wait.until(EC.presence_of_element_located((By.XPATH,contact_path)))
 contact.click()
 input_field_path = '//div[@class="to2l77zo gfz4du6o ag5g9lrv bze30y65 kao4egtt"][@contenteditable="true"][@title="Type a message"][@data-tab="10"]'
 input_field = wait.until(EC.presence_of_element_located((By.XPATH,input_field_path)))
-input_field.send_keys("Leet Code: "+"  ".join(leet_code_data)+Keys.ENTER)
-input_field.send_keys("Gfg: "+"  ".join(gfg_data)+Keys.ENTER)
-input_field.send_keys("Code Chef: "+"  ".join(code_chef_data)+Keys.ENTER)
-input_field.send_keys("Code Force: "+"  ".join(code_forces_data)+Keys.ENTER)
-input_field.send_keys("Coding Ninjas: "+coding_ninjas_data+Keys.ENTER)
+if len(leet_code_data)!=0:
+    input_field.send_keys("Leet Code: "+"  ".join(leet_code_data)+Keys.ENTER)
+if len(gfg_data)!=0:
+    input_field.send_keys("Gfg: "+"  ".join(gfg_data)+Keys.ENTER)
+if len(code_chef_data)!=0:
+    input_field.send_keys("Code Chef: "+"  ".join(code_chef_data)+Keys.ENTER)
+if len(code_forces_data):
+    input_field.send_keys("Code Force: "+"  ".join(code_forces_data)+Keys.ENTER)
+if coding_ninjas_data != "-1":
+    input_field.send_keys("Coding Ninjas: "+coding_ninjas_data+Keys.ENTER)
 time.sleep(5)
 driver.quit()

@@ -12,5 +12,5 @@ def get_data(driver):
     contest_details = wait.until(EC.presence_of_all_elements_located((By.XPATH,contest_paths)))
     contest_time = "-1"
     if int(contest_details[0].text)<16:
-        contest_time = contest_details[0].text+contest_details[1].text
+        contest_time = f"Starts at {int(contest_details[0].text)+datetime.now().hour} : {int(contest_details[1].text)+datetime.now().minute}"
     return contest_time
