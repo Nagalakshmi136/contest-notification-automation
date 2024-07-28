@@ -1,48 +1,52 @@
-# Import the libraries
-from selenium import webdriver
-from config import CHROME_PROFILE_PATH
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
-from utils import leet_code,code_chef,code_forces,gfg,coding_ninjas
-import time
+import logging
+from app.utils.types.contest_sources import ContestSource
+from typing import List, Tuple
+from app.notifiers.whatsapp import WhatsappNotifier
+from app.data_classes.contest_dataclass import ContestDetails
+from datetime import date
 
-# Initializing web browser
-options = webdriver.ChromeOptions()
-options.add_experimental_option("detach", True)
-options.add_argument(CHROME_PROFILE_PATH)
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),options=options)
-# Fetching data from websites
-leet_code_data = leet_code.get_data(driver)
-gfg_data = gfg.get_data(driver)
-code_chef_data = code_chef.get_data(driver)
-code_forces_data = code_forces.get_data(driver)
-coding_ninjas_data = coding_ninjas.get_data(driver) 
-# Sending data to whats app
-url = "https://web.whatsapp.com/"
-driver.get(url)
-wait = WebDriverWait(driver,500)
-search_box_path = '//*[@id="side"]/div[1]/div/div[2]/div[2]/div/div[1]/p'
-search_box = wait.until(EC.presence_of_element_located((By.XPATH,search_box_path)))
-search_box.send_keys("Contests")
-# target = '"Ipo"'
-contact_path = '//span[@title="Contests"]'
-contact = wait.until(EC.presence_of_element_located((By.XPATH,contact_path)))
-contact.click()
-input_field_path = '//div[@class="to2l77zo gfz4du6o ag5g9lrv bze30y65 kao4egtt"][@contenteditable="true"][@title="Type a message"][@data-tab="10"]'
-input_field = wait.until(EC.presence_of_element_located((By.XPATH,input_field_path)))
-if len(leet_code_data)!=0:
-    input_field.send_keys("Leet Code: "+"  ".join(leet_code_data)+Keys.ENTER)
-if len(gfg_data)!=0:
-    input_field.send_keys("Gfg: "+"  ".join(gfg_data)+Keys.ENTER)
-if len(code_chef_data)!=0:
-    input_field.send_keys("Code Chef: "+"  ".join(code_chef_data)+Keys.ENTER)
-if len(code_forces_data):
-    input_field.send_keys("Code Force: "+"  ".join(code_forces_data)+Keys.ENTER)
-if coding_ninjas_data != "-1":
-    input_field.send_keys("Coding Ninjas: "+coding_ninjas_data+Keys.ENTER)
-time.sleep(5)
-driver.quit()
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+
+def fetch_all_contest_data() -> List[Tuple[str, List[ContestDetails]]]:
+    """
+    Fetches contest data from various sources.
+
+    Returns:
+    -------
+    ``List[Tuple[str, List[IpoDataInfo]]]``
+        A list of tuples where each tuple contains the source name and the list of contest data.
+    """
+    contest_data = []
+    for source in ContestSource:
+        try:
+            logging.info(f"Fetching data from {source.source_name}")
+            data = source.fetcher.fetch_data()
+            contest_data.append((source.source_name, data))
+        except Exception as e:
+            logging.error(f"Failed to fetch data from {source.source_name}: {e}")
+
+    return contest_data
+
+
+def main():
+    """
+    Main function to fetch contest data and notify via WhatsApp.
+    """
+    try:
+        contest_data = fetch_all_contest_data()
+        if contest_data:
+            notifier = WhatsappNotifier(target_date=date.today().strftime("%d-%m-%Y"))
+            notifier.send_notification("Contests", contest_data)
+            logging.info("Notification sent successfully.")
+        else:
+            logging.warning("No contest data fetched.")
+    except Exception as e:
+        logging.error(f"An error occurred during the process: {e}")
+
+
+if __name__ == "__main__":
+    main()

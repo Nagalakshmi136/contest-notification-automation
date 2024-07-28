@@ -1,5 +1,0 @@
-GFG = 'https://www.geeksforgeeks.org/events?itm_source=geeksforgeeks&itm_medium=main_header&itm_campaign=contests'
-LEET_CODE = 'https://leetcode.com/contest/'
-CODE_CHEF = 'https://www.codechef.com/contests'
-CODING_NINJAS = 'https://www.codingninjas.com/studio/contests'
-CODE_FORCES = 'https://codeforces.com/contests'
